@@ -5,6 +5,7 @@ import { loadBest, saveBest } from '../core/storage';
 import { Spawner } from '../systems/spawner';
 import { InputController, type Action } from '../systems/input';
 import { AudioManager, type Sfx } from '../systems/audio';
+import { gameplayStart, gameplayStop, maybeMidgameAd } from '../platform/crazygames';
 import { Hud } from '../ui/hud';
 
 interface Obstacle extends Phaser.GameObjects.Image { lane: number; kind: ObstacleKind }
@@ -24,6 +25,7 @@ export class GameScene extends Phaser.Scene {
   private score = 0;
   private best = loadBest();
   private dead = false;
+  private adActive = false;
 
   constructor() { super('Game'); }
 
@@ -51,6 +53,7 @@ export class GameScene extends Phaser.Scene {
     this.dead = false;
     this.nextMilestone = 500;
     this.hud.hideGameOver();
+    gameplayStart();
   }
 
   private toggleMute(): void {
@@ -63,7 +66,16 @@ export class GameScene extends Phaser.Scene {
   private onAction(a: Action): void {
     this.audio.unlock();
     if (a === 'mute') return this.toggleMute();
-    if (this.dead) { if (a === 'restart' || a === 'jump') this.restart(); return; }
+    if (this.adActive) return;
+    if (this.dead) {
+      if (a === 'restart' || a === 'jump') {
+        maybeMidgameAd(() => this.restart(), (on) => {
+          this.adActive = on;
+          this.audio.suspended = on;
+        });
+      }
+      return;
+    }
     const s = this.state;
     if (a === 'left') s.lane = Math.max(0, s.lane - 1);
     else if (a === 'right') s.lane = Math.min(LANES.length - 1, s.lane + 1);
@@ -116,6 +128,7 @@ export class GameScene extends Phaser.Scene {
 
   private die(): void {
     this.dead = true;
+    gameplayStop();
     this.best = Math.max(this.best, this.score);
     saveBest(this.best);
     this.player.setAngle(180).setAlpha(0.8);

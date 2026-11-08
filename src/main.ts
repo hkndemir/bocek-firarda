@@ -3,6 +3,10 @@ import { GAME_H, GAME_W } from './core/constants';
 import { BootScene } from './scenes/boot';
 import { GameScene } from './scenes/game';
 
+import { initPlatform } from './platform/crazygames';
+
+void initPlatform(); // SDK arka planda yüklenir, oyunu bekletmez
+
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',

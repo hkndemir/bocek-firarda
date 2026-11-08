@@ -6,6 +6,8 @@ export type Sfx = 'jump' | 'slide' | 'lane' | 'hit' | 'milestone';
 export class AudioManager {
   private ctx: AudioContext | null = null;
   muted = loadMuted();
+  /** Reklam sırasında geçici susturma (kullanıcı tercihini değiştirmez). */
+  suspended = false;
 
   /** Tarayıcılar ilk kullanıcı etkileşimine kadar sesi engeller. */
   unlock(): void {
@@ -22,7 +24,7 @@ export class AudioManager {
   }
 
   play(name: Sfx): void {
-    if (this.muted || !this.ctx || this.ctx.state !== 'running') return;
+    if (this.muted || this.suspended || !this.ctx || this.ctx.state !== 'running') return;
     switch (name) {
       case 'jump': return this.tone(280, 560, 0.18, 'square', 0.08);
       case 'slide': return this.tone(320, 120, 0.2, 'sawtooth', 0.06);

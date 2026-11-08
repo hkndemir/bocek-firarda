@@ -13,6 +13,7 @@ export class InputController {
     for (const [k, a] of Object.entries(map)) kb.on(`keydown-${k}`, () => onAction(a));
 
     scene.input.on('pointerup', (p: Phaser.Input.Pointer) => {
+      if (scene.input.hitTestPointer(p).length > 0) return; // UI düğmesine dokunuldu
       const dx = p.upX - p.downX, dy = p.upY - p.downY;
       const ax = Math.abs(dx), ay = Math.abs(dy);
       if (Math.max(ax, ay) < 25) return onAction('restart'); // tap (only used on game over)
