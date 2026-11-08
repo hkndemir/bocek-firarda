@@ -4,6 +4,7 @@ import { hits, speedAt, type ObstacleKind, type PlayerState } from '../core/rule
 import { loadBest, saveBest } from '../core/storage';
 import { Spawner } from '../systems/spawner';
 import { InputController, type Action } from '../systems/input';
+import { AudioManager, type Sfx } from '../systems/audio';
 import { Hud } from '../ui/hud';
 
 interface Obstacle extends Phaser.GameObjects.Image { lane: number; kind: ObstacleKind }
@@ -14,6 +15,8 @@ export class GameScene extends Phaser.Scene {
   private obstacles: Obstacle[] = [];
   private spawner = new Spawner();
   private hud!: Hud;
+  private audio = new AudioManager();
+  private nextMilestone = 500;
   private road!: Phaser.GameObjects.TileSprite;
   private shadow!: Phaser.GameObjects.Image;
   private elapsed = 0;
@@ -29,7 +32,7 @@ export class GameScene extends Phaser.Scene {
     this.drawRoad();
     this.shadow = this.add.image(LANES[1], PLAYER_Y + 30, 'shadow').setDepth(4);
     this.player = this.add.image(LANES[1], PLAYER_Y, 'bug').setDepth(5);
-    this.hud = new Hud(this);
+    this.hud = new Hud(this, this.audio.muted, () => this.toggleMute());
     new InputController(this, (a) => this.onAction(a));
     this.restart();
   }
@@ -46,10 +49,20 @@ export class GameScene extends Phaser.Scene {
     this.player.setPosition(LANES[1], PLAYER_Y).setScale(1).setAngle(0).setAlpha(1);
     this.elapsed = this.dist = this.score = 0;
     this.dead = false;
+    this.nextMilestone = 500;
     this.hud.hideGameOver();
   }
 
+  private toggleMute(): void {
+    this.audio.unlock();
+    this.hud.setMuted(this.audio.toggleMute());
+  }
+
+  private sfx(n: Sfx): void { this.audio.play(n); }
+
   private onAction(a: Action): void {
+    this.audio.unlock();
+    if (a === 'mute') return this.toggleMute();
     if (this.dead) { if (a === 'restart' || a === 'jump') this.restart(); return; }
     const s = this.state;
     if (a === 'left') s.lane = Math.max(0, s.lane - 1);
@@ -57,14 +70,17 @@ export class GameScene extends Phaser.Scene {
     else if (a === 'jump' && !s.jumping) {
       s.jumping = s.sliding = false;
       s.jumping = true;
+      this.sfx('jump');
       this.tweens.add({ targets: this.player, scale: 1.5, yoyo: true, duration: JUMP_MS / 2,
         onComplete: () => { s.jumping = false; } });
     } else if (a === 'slide' && !s.sliding && !s.jumping) {
       s.sliding = true;
+      this.sfx('slide');
       this.player.setScale(1, 0.5);
       this.time.delayedCall(SLIDE_MS, () => { s.sliding = false; this.player.setScale(1); });
     }
     if (a === 'left' || a === 'right') {
+      this.sfx('lane');
       this.tweens.add({ targets: this.player, x: LANES[s.lane], duration: 90 });
       this.tweens.add({ targets: this.player, angle: a === 'left' ? -15 : 15, duration: 60, yoyo: true });
     }
@@ -94,6 +110,7 @@ export class GameScene extends Phaser.Scene {
       if (o.y > GAME_H + 60) { o.destroy(); return false; }
       return true;
     });
+    if (this.score >= this.nextMilestone) { this.nextMilestone += 500; this.sfx('milestone'); }
     this.hud.update(this.score, this.dist, Math.max(this.best, this.score));
   }
 
@@ -102,6 +119,7 @@ export class GameScene extends Phaser.Scene {
     this.best = Math.max(this.best, this.score);
     saveBest(this.best);
     this.player.setAngle(180).setAlpha(0.8);
+    this.sfx('hit');
     this.cameras.main.shake(250, 0.015);
     this.cameras.main.flash(150, 255, 80, 80);
     this.hud.showGameOver(this.score, this.best);

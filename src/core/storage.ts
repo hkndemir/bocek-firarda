@@ -7,3 +7,11 @@ export function loadBest(): number {
 export function saveBest(v: number): void {
   try { localStorage.setItem(KEY, String(Math.floor(v))); } catch { /* ignore */ }
 }
+
+const MUTE_KEY = 'bocek-firarda:muted';
+export function loadMuted(): boolean {
+  try { return localStorage.getItem(MUTE_KEY) === '1'; } catch { return false; }
+}
+export function saveMuted(m: boolean): void {
+  try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch { /* ignore */ }
+}

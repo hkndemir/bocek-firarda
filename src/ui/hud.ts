@@ -5,15 +5,22 @@ export class Hud {
   private score: Phaser.GameObjects.Text;
   private info: Phaser.GameObjects.Text;
   private over: Phaser.GameObjects.Text;
+  private mute: Phaser.GameObjects.Text;
 
-  constructor(scene: Phaser.Scene) {
+  constructor(scene: Phaser.Scene, muted: boolean, onMute: () => void) {
     const st = { fontFamily: 'sans-serif', color: '#fff', stroke: '#000', strokeThickness: 4 };
     this.score = scene.add.text(12, 10, '', { ...st, fontSize: '22px' }).setDepth(10);
     this.info = scene.add.text(GAME_W - 12, 10, '', { ...st, fontSize: '16px', align: 'right' })
       .setOrigin(1, 0).setDepth(10);
     this.over = scene.add.text(GAME_W / 2, GAME_H / 2, '', { ...st, fontSize: '30px', align: 'center' })
       .setOrigin(0.5).setDepth(10).setVisible(false);
+    this.mute = scene.add.text(GAME_W / 2, 14, '', { fontSize: '24px', padding: { x: 10, y: 6 } })
+      .setOrigin(0.5, 0).setDepth(10).setInteractive({ useHandCursor: true });
+    this.mute.on('pointerdown', onMute);
+    this.setMuted(muted);
   }
+
+  setMuted(m: boolean): void { this.mute.setText(m ? '🔇' : '🔊'); }
 
   update(score: number, dist: number, best: number): void {
     this.score.setText(`Skor ${Math.floor(score)}`);

@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 
-export type Action = 'left' | 'right' | 'jump' | 'slide' | 'restart';
+export type Action = 'left' | 'right' | 'jump' | 'slide' | 'restart' | 'mute';
 
 /** Translates keyboard and swipe/tap input into abstract actions. */
 export class InputController {
@@ -8,7 +8,7 @@ export class InputController {
     const kb = scene.input.keyboard!;
     const map: Record<string, Action> = {
       LEFT: 'left', A: 'left', RIGHT: 'right', D: 'right',
-      UP: 'jump', W: 'jump', SPACE: 'jump', DOWN: 'slide', S: 'slide', ENTER: 'restart',
+      UP: 'jump', W: 'jump', SPACE: 'jump', DOWN: 'slide', S: 'slide', ENTER: 'restart', M: 'mute',
     };
     for (const [k, a] of Object.entries(map)) kb.on(`keydown-${k}`, () => onAction(a));
 
