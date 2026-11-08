@@ -1,12 +1,13 @@
 import { ACCEL, HIT_BAND, MAX_SPEED, PLAYER_Y, START_SPEED } from './constants';
 
 /** How the player can get past an obstacle. */
-export type ObstacleKind = 'slipper' | 'cat' | 'vacuum';
+export type ObstacleKind = 'slipper' | 'cat' | 'vacuum' | 'spray';
 export type Counter = 'jump' | 'slide' | 'dodge';
 
 export const KIND_COUNTER: Record<ObstacleKind, Counter> = {
   slipper: 'jump', // low: hop over it
-  vacuum: 'slide', // hose overhead: slide under
+  vacuum: 'dodge', // big angry vacuum: change lane
+  spray: 'slide', // toxic mist at head height: slide under
   cat: 'dodge', // full block: change lane
 };
 

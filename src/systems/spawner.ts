@@ -1,7 +1,7 @@
 import { LANES } from '../core/constants';
 import type { ObstacleKind } from '../core/rules';
 
-const KINDS: ObstacleKind[] = ['slipper', 'cat', 'vacuum'];
+const KINDS: ObstacleKind[] = ['slipper', 'cat', 'vacuum', 'spray'];
 
 /** Distance-based spawner: decides what spawns and when (no Phaser objects). */
 export class Spawner {

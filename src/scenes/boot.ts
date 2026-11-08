@@ -1,10 +1,9 @@
 import Phaser from 'phaser';
-import { makePlaceholderTextures } from '../assets/textures';
+import { loadSvgTextures } from '../assets/svgTextures';
 
 export class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
   create(): void {
-    makePlaceholderTextures(this);
-    this.scene.start('Game');
+    loadSvgTextures(this).then(() => this.scene.start('Game'));
   }
 }

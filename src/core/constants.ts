@@ -3,8 +3,8 @@ export const GAME_H = 640;
 export const LANES = [90, 180, 270] as const;
 export const PLAYER_Y = 500;
 
-export const START_SPEED = 260; // px/s
-export const MAX_SPEED = 620;
+export const START_SPEED = 230; // px/s
+export const MAX_SPEED = 540;
 export const ACCEL = 6; // px/s per second
 
 export const JUMP_MS = 650;
